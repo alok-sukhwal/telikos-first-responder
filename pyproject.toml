@@ -1,0 +1,24 @@
+[project]
+name = "telikos-first-responder"
+version = "0.1.0"
+description = "A chat agent that answers users' functional questions from a local knowledge base."
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.40",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+]
+
+# This is an application, not a distributable package — don't build/install the project itself.
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
