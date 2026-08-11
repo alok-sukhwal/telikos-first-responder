@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/test-gate.sh",
+            "if": "Bash(git commit*)",
+            "timeout": 120,
+            "statusMessage": "Running tests with coverage"
+          }
+        ]
+      }
+    ]
+  }
+}

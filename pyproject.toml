@@ -9,12 +9,31 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.7",
 ]
 
 # This is an application, not a distributable package — don't build/install the project itself.
 [tool.uv]
 package = false
+
+# The project isn't installed (package = false), so put the repo root on sys.path for imports.
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+# Coverage measures the package and the Streamlit entry point, which the AppTest suite drives.
+# `uv run pytest --cov` reads these; plain `uv run pytest` stays fast and ungated.
+[tool.coverage.run]
+source = ["first_responder", "app"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
+# fail_under compares the percentage rounded to `precision` decimals. At the default of 0,
+# 89.6% rounds to 90 and passes a 90% gate; two decimals makes the threshold mean what it says.
+precision = 2
 
 [tool.ruff]
 line-length = 100
