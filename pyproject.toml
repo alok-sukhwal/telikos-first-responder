@@ -9,12 +9,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.7",
 ]
 
 # This is an application, not a distributable package — don't build/install the project itself.
 [tool.uv]
 package = false
+
+# The project isn't installed (package = false), so put the repo root on sys.path for imports.
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
