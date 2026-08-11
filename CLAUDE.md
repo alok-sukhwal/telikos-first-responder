@@ -9,6 +9,7 @@ Full product intent lives in **docs/brief.md** — read it first.
 uv sync                       # install dependencies
 uv run streamlit run app.py   # start the chat UI (http://localhost:8501)
 uv run pytest                 # run the tests
+uv run pytest --cov           # run the tests with line coverage; fails under 90%
 ```
 
 ## Rules

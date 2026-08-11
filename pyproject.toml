@@ -10,6 +10,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.7",
 ]
 
@@ -21,6 +22,15 @@ package = false
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+# Coverage measures the package and the Streamlit entry point, which the AppTest suite drives.
+# `uv run pytest --cov` reads these; plain `uv run pytest` stays fast and ungated.
+[tool.coverage.run]
+source = ["first_responder", "app"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
 
 [tool.ruff]
 line-length = 100

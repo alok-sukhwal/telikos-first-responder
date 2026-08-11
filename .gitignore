@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 .venv/
 
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
 # Environment / secrets
 .env
 .streamlit/secrets.toml
