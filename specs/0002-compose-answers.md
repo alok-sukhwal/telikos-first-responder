@@ -219,6 +219,12 @@ stub is standard library only.
    this slice because the cause is in retrieval, not composition, but it arguably makes this slice a
    net regression in honesty until it is addressed. Worth a decision: ship this and fix retrieval
    next, or fix retrieval first?
+
+   **Resolved by spec 0004 (retrieval first).** Matched words now carry a rarity weight, and any
+   question word absent from the corpus is named in the reply. The score-1 tie itself survives
+   where passages match the identical word set — see spec 0004 § "What this does and does not
+   fix" — so when this slice is implemented, its prose must carry the caveat through rather than
+   smoothing it away.
 2. **The `From:` line** (rules 13–14) — keeping it preserves the provenance spec 0001 shipped, but
    the brief calls citations a nice-to-have. Drop it if you'd rather the answer stood alone.
 3. **Naive sentence splitting** breaks on `e.g.`, `Inc.` and decimals like `3.5`, occasionally

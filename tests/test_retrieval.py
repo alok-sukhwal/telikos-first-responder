@@ -3,7 +3,13 @@
 from pathlib import Path
 
 from first_responder.knowledge_base import Passage, load_knowledge_base
-from first_responder.retrieval import normalise, search
+from first_responder.retrieval import (
+    document_frequencies,
+    normalise,
+    search,
+    term_weight,
+    unmatched_terms,
+)
 
 FIXTURE_KB = Path(__file__).parent / "fixtures" / "kb"
 
@@ -27,7 +33,7 @@ def test_top_passage_is_the_invoice_reset_paragraph() -> None:
 
     assert matches[0].passage.source == "billing.md"
     assert matches[0].passage.position == 0
-    assert matches[0].score == 2
+    assert matches[0].score > matches[1].score
 
 
 def test_a_question_matching_only_a_heading_still_returns_the_answer() -> None:
@@ -51,7 +57,7 @@ def test_two_distinct_matches_outrank_one() -> None:
     matches = search("reset invoice", passages)
 
     assert [m.passage.source for m in matches] == ["b.md", "a.md"]
-    assert [m.score for m in matches] == [2, 1]
+    assert matches[0].score > matches[1].score
 
 
 def test_repeated_word_in_a_passage_scores_once() -> None:
@@ -60,7 +66,7 @@ def test_repeated_word_in_a_passage_scores_once() -> None:
 
     matches = search("invoice", [once, many])
 
-    assert {m.score for m in matches} == {1}
+    assert len({m.score for m in matches}) == 1
 
 
 def test_repeated_word_in_the_question_does_not_change_ranking() -> None:
@@ -104,6 +110,79 @@ def test_no_stemming_or_substring_matching() -> None:
     passages = [passage("a.md", 0, "The client lists recent invoices.")]
 
     assert search("invoice", passages) == []
+
+
+# --- rarity weighting: a corpus-wide word must not tie with a discriminating one ---
+
+
+def test_a_rare_word_outranks_a_corpus_wide_one() -> None:
+    """Under flat scoring both of these score 1 and document order decides."""
+    passages = [
+        passage("a.md", 0, "invoice mentioned here"),
+        passage("b.md", 0, "invoice and the rare word telescope"),
+        passage("c.md", 0, "invoice again"),
+        passage("d.md", 0, "invoice yet again"),
+    ]
+
+    matches = search("telescope", passages)
+    common = search("invoice", passages)
+
+    assert [m.passage.source for m in matches] == ["b.md"]
+    assert matches[0].score > common[0].score
+
+
+def test_matching_one_rare_word_beats_matching_one_common_word() -> None:
+    passages = [
+        passage("common.md", 0, "invoice one"),
+        passage("common.md", 1, "invoice two"),
+        passage("common.md", 2, "invoice three"),
+        passage("rare.md", 0, "telescope"),
+    ]
+
+    matches = search("invoice telescope", passages)
+
+    assert matches[0].passage.source == "rare.md"
+
+
+def test_a_word_in_every_passage_still_scores_above_zero() -> None:
+    """Weighting must not silence a word just because it is everywhere."""
+    passages = [passage("a.md", 0, "invoice"), passage("b.md", 0, "invoice")]
+
+    matches = search("invoice", passages)
+
+    assert len(matches) == 2
+    assert all(m.score > 0 for m in matches)
+
+
+def test_term_weight_falls_as_a_word_gets_more_common() -> None:
+    assert term_weight(1, 100) > term_weight(50, 100) > term_weight(100, 100) > 0
+
+
+def test_document_frequencies_counts_passages_not_occurrences() -> None:
+    passages = [passage("a.md", 0, "invoice invoice invoice"), passage("b.md", 0, "invoice")]
+
+    assert document_frequencies(passages)["invoice"] == 2
+
+
+# --- naming the words the corpus has never seen ---
+
+
+def test_unmatched_terms_names_words_absent_from_the_corpus() -> None:
+    kb = load_knowledge_base(FIXTURE_KB)
+
+    assert unmatched_terms("how do I archive an invoice", kb.passages) == ["archive"]
+
+
+def test_unmatched_terms_keeps_question_order_and_drops_duplicates() -> None:
+    kb = load_knowledge_base(FIXTURE_KB)
+
+    assert unmatched_terms("zebra archive zebra", kb.passages) == ["zebra", "archive"]
+
+
+def test_unmatched_terms_is_empty_when_every_word_matched() -> None:
+    kb = load_knowledge_base(FIXTURE_KB)
+
+    assert unmatched_terms("reset invoice", kb.passages) == []
 
 
 def test_question_matching_nothing_returns_no_results() -> None:

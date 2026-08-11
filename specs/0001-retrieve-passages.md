@@ -37,11 +37,15 @@ misses meaning-based matches — before any prose is layered on top of it.
 5. A passage's **score** is the number of *distinct* remaining question words whose exact token
    appears in that passage. No stemming, no synonyms, no substring matching — `invoices` does
    not match `invoice`.
+   *(**Superseded by spec 0004:** each matched word now contributes its rarity weight rather
+   than one flat point, because `invoice` is in 55% of the corpus and tied everything at 1.)*
 6. Passages are ranked by score, highest first. Ties are broken by document order: filename
    A→Z, then position within the file.
 7. The reply shows the **top 3** passages scoring at least 1, each rendered as its source
    filename followed by the passage text in full. Fewer than three matches shows however many
    there are. Passages are never truncated.
+   *(**Reworded by spec 0004:** the threshold is "contains at least one question word". Since
+   every rarity weight is positive the condition is the same one; only the wording changed.)*
 
 **When there's nothing to show**
 

@@ -32,6 +32,29 @@ def test_reply_never_truncates_a_passage(knowledge_base: KnowledgeBase) -> None:
     assert expected.text in reply
 
 
+def test_reply_names_a_word_the_corpus_does_not_have(knowledge_base: KnowledgeBase) -> None:
+    """A partial answer must not read as a confident whole one."""
+    reply = compose_reply("how do I archive an invoice", knowledge_base)
+
+    assert reply.startswith("Nothing in the knowledge base mentions **archive**.")
+    assert "**billing.md**" in reply
+
+
+def test_reply_carries_no_caveat_when_every_word_matched(
+    knowledge_base: KnowledgeBase,
+) -> None:
+    reply = compose_reply("reset invoice", knowledge_base)
+
+    assert "Nothing in the knowledge base mentions" not in reply
+    assert reply.startswith("**billing.md**")
+
+
+def test_several_missing_words_are_listed_together(knowledge_base: KnowledgeBase) -> None:
+    reply = compose_reply("archive zebra invoice", knowledge_base)
+
+    assert reply.startswith("Nothing in the knowledge base mentions **archive** and **zebra**.")
+
+
 def test_unmatched_question_gets_the_no_match_message(knowledge_base: KnowledgeBase) -> None:
     assert compose_reply("zzzz quantum", knowledge_base) == NO_MATCH
 
