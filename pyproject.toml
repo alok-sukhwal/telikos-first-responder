@@ -31,6 +31,9 @@ source = ["first_responder", "app"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 90
+# fail_under compares the percentage rounded to `precision` decimals. At the default of 0,
+# 89.6% rounds to 90 and passes a 90% gate; two decimals makes the threshold mean what it says.
+precision = 2
 
 [tool.ruff]
 line-length = 100
