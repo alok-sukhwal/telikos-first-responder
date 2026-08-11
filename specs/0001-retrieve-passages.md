@@ -24,6 +24,8 @@ misses meaning-based matches — before any prose is layered on top of it.
 2. Each file is split into passages on blank lines. A passage is one block of text with
    surrounding whitespace trimmed; empty blocks are discarded. Markdown is kept exactly as
    written — no rendering, no stripping of `#`, `*` or link syntax.
+   *(**Superseded by spec 0003:** a heading-only block is now joined to the body it labels, so a
+   document in idiomatic Markdown is searchable without being reshaped by hand.)*
 3. Documents are loaded once per session and held in memory. Editing files in `docs/kb/`
    requires a restart to take effect. *(assumption — flag if you want a reload control)*
 
@@ -92,7 +94,7 @@ Fixture corpus at `tests/fixtures/kb/`, two files:
 - `billing.md` — a paragraph about resetting an invoice, a paragraph about payment terms.
 - `setup.md` — a paragraph about installing the client, a paragraph mentioning invoices once.
 
-- [x] Loading `tests/fixtures/kb/` yields passages from both files, split on blank lines, with no empty passages and whitespace trimmed.
+- [x] Loading `tests/fixtures/kb/` yields passages from both files, split on blank lines, with no empty passages and whitespace trimmed. *(splitting amended by spec 0003; the fixture corpus has since gained a third file, `headings.md`)*
 - [x] Given the question "how do I reset an invoice", the top passage is the invoice-reset paragraph from `billing.md`.
 - [x] A passage matching two distinct question words outranks a passage matching one.
 - [x] A passage containing one question word five times scores the same as a passage containing it once.
@@ -103,7 +105,7 @@ Fixture corpus at `tests/fixtures/kb/`, two files:
 - [x] Given `""`, `"   "` and `"the and of"`, retrieval is not invoked and the "ask a real question" branch is taken.
 - [x] Pointing the loader at a non-existent directory returns zero documents and raises no exception.
 - [x] Pointing the loader at a directory containing an undecodable file skips that file, still loads the valid ones, and surfaces a warning naming the skipped file.
-- [x] Each returned result carries its source filename, and the passage text is byte-identical to the source paragraph.
+- [x] Each returned result carries its source filename, and the passage text is byte-identical to the source paragraph. *(**Amended by spec 0003:** the exact claim is that every **line** of a passage is byte-identical to a line of its source; a passage may now span a heading and the paragraph below it.)*
 - [x] Manual check, once: `uv run streamlit run app.py`, ask a question against real `docs/kb/` content, and see up to three filename-labelled passages in the chat.
 - [x] `uv run ruff format .` and `uv run ruff check .` are clean.
 

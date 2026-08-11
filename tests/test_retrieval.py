@@ -30,6 +30,18 @@ def test_top_passage_is_the_invoice_reset_paragraph() -> None:
     assert matches[0].score == 2
 
 
+def test_a_question_matching_only_a_heading_still_returns_the_answer() -> None:
+    """ "window" appears only in headings.md's heading; the answer is in the body below it."""
+    kb = load_knowledge_base(FIXTURE_KB)
+
+    matches = search("how long is the refund window", kb.passages)
+
+    assert matches[0].passage.source == "headings.md"
+    assert (
+        "A refund can be requested within fourteen days of the charge." in matches[0].passage.text
+    )
+
+
 def test_two_distinct_matches_outrank_one() -> None:
     passages = [
         passage("a.md", 0, "This mentions invoice only."),
